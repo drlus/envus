@@ -592,6 +592,7 @@ void h_eval(double *out,double *x,double *y,double *u,double *p,double Dt){
 
 out[0] = cos(x[0]);
 out[1] = sin(x[0]);
+out[2] = u[0];
 
 }
 void de_jac_ini_xy_eval(double *out,double *x,double *y,double *u,double *p,double Dt){
