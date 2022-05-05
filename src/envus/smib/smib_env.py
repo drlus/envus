@@ -12,13 +12,13 @@ class SmibDAE(gym.Env):
         self.dt = 0.05
         self.viewer = None
         
-        self.cont = cont
+        self.cont = True
         
 
         # Actions:
         # v_f: (0,1.5)
         self.min_v_f = 1.0
-        self.max_v_f = 3.0    
+        self.max_v_f = 5.0    
         if self.cont:
             self.action_space = spaces.Box(low=self.min_v_f, high=self.max_v_f, shape=(1,), dtype=np.float32)
         else:
@@ -37,18 +37,21 @@ class SmibDAE(gym.Env):
         self.seed()
 
         self.dae = smib_dae.model()
-        self.dae.ini({'v_f':1.5,'p_m':0.1},{'delta':0.0,'v_t':1,'omega':1,'e1q':1.0,'theta_t':0.0})
+        self.dae.Dt = 0.01
+        self.p_m = 0.5
+        self.V_0 = 1.0
+        self.v_f = 1.5
+        
+        
+        self.dae.ini({'v_f':self.v_f,'p_m':self.p_m,'H':6.5},{'delta':0.0,'v_t':1,'omega':1,'e1q':1.0,'theta_t':0.0})
         self.dae.save_xy_0('xy_0.json')
         self.t = 0.0
         
-        self.p_m = 0.5
-        self.V_0 = 1.0
-        self.v_f = 2.0
-        
+
         self.v_t_ref = 1.0
         self.omega_ref = 1.0
         
-        self.DV_0 = -0.05
+        self.DV_0 = 0.05
         
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -65,34 +68,35 @@ class SmibDAE(gym.Env):
         
         if self.cont:
             v_f = np.clip(u, self.min_v_f, self.max_v_f)[0]
-            self.v_f = v_f
+            self.v_f = u
         else:
             self.v_f = self.d2c(u)
         
-        self.dae.run(self.t,{'v_f':self.v_f,'p_m':p_m,'V_0':V_0})
+        self.dae.step(self.t,{'v_f':self.v_f,'p_m':p_m,'V_0':V_0})
      
         #self.state = np.array([newth, newthdot])\n",
         self.state = self.dae.get_mvalue(['v_t','omega','p_t','q_t'])
         
         v_t,omega,p_t,q_t = self.state
         
-        #costs = -np.log(np.abs(self.v_t_ref - v_t))  - np.log(np.abs(self.omega_ref - omega)*400)
-        costs =  - np.log(np.abs(self.omega_ref - omega)*400)
+        costs = -np.log(np.abs(self.v_t_ref - v_t)) - np.log(np.abs(p_m-p_t))
+        #costs =  - np.log(np.abs(self.omega_ref - omega)*400)
 
         return self._get_obs(), -costs, False, {}
 
     def reset(self):
-        self.dae = smib_dae.model()
-        self.dae.Dt = 0.01
+        
 
-        #self.state = self.np_random.uniform(low=-high, high=high)
+        DV_0 = self.np_random.uniform(low=-self.DV_0, high=self.DV_0)
         #self.last_u = None
         
         self.t = 0.0
         self.V_0 = 1.0
         self.dae.ini({'v_f':self.v_f,'p_m':self.p_m,'V_0':self.V_0},'xy_0.json')
         self.state = self.dae.get_mvalue(['v_t','omega','p_t','q_t'])
-        self.V_0 = 1.0 + self.DV_0
+        self.V_0 = 1.0 + DV_0
+        
+        #print(f'V_0 = {self.V_0:0.3f}')
         return self._get_obs()
 
     def _get_obs(self):
