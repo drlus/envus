@@ -3,7 +3,7 @@ from gym import spaces
 from gym.utils import seeding
 import numpy as np
 from os import path
-from pendulum.envs import pendulum_dae
+from envus.pendulum import pendulum_dae
 
 class PendulumDAEEnv(gym.Env):
     metadata = {"render.modes": ["human", "rgb_array"], "video.frames_per_second": 30}
@@ -50,7 +50,7 @@ class PendulumDAEEnv(gym.Env):
         #newthdot = np.clip(newthdot, -self.max_speed, self.max_speed)
         #newth = th + newthdot * dt
         
-        self.dae.step(self.t,{'u':u,'M':self.m,'G':self.g})
+        self.dae.step(self.t,{'tau':u,'M':self.m,'G':self.g})
      
         #self.state = np.array([newth, newthdot])\n",
         self.state = self.dae.get_mvalue(['theta','omega'])
@@ -62,7 +62,7 @@ class PendulumDAEEnv(gym.Env):
         
         self.u = np.array([0.0]).astype(np.float32)
         
-        self.dae.ini({'u':self.u,'M':self.m,'G':self.g})
+        self.dae.ini({'tau':self.u,'M':self.m,'G':self.g})
         high = np.array([np.pi, 1])
         self.state = self.np_random.uniform(low=-high, high=high)
         self.last_u = None

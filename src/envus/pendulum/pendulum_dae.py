@@ -16,7 +16,7 @@ ffi = cffi.FFI()
 if dae_file_mode == 'local':
     import pendulum_dae_cffi as jacs
 if dae_file_mode == 'enviroment':
-    import pendulum.envs.pendulum_dae_cffi as jacs
+    import envus.pendulum.pendulum_dae_cffi as jacs
 
 cffi_support.register_module(jacs)
 f_ini_eval = jacs.lib.f_ini_eval
