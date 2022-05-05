@@ -1,9 +1,3 @@
-# Core Library
-import logging
+"""SMIB DAE Enviornments."""
 
-# Third party
-from gym.envs.registration import register
-
-logger = logging.getLogger(__name__)
-
-register(id="SmibDAE-v0", entry_point="smib.envs:SmibDAE")
+from envus.smib.smib_env import SmibDAE

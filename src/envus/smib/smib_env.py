@@ -3,7 +3,7 @@ from gym import spaces
 from gym.utils import seeding
 import numpy as np
 from os import path
-from smib.envs import smib_dae
+from envus.smib import smib_dae
 
 class SmibDAE(gym.Env):
     metadata = {"render.modes": ["human", "rgb_array"], "video.frames_per_second": 30}
@@ -37,6 +37,8 @@ class SmibDAE(gym.Env):
         self.seed()
 
         self.dae = smib_dae.model()
+        self.dae.ini({'v_f':1.5,'p_m':0.1},{'delta':0.0,'v_t':1,'omega':1,'e1q':1.0,'theta_t':0.0})
+        self.dae.save_xy_0('xy_0.json')
         self.t = 0.0
         
         self.p_m = 0.5
