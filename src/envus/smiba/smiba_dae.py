@@ -14,9 +14,9 @@ dae_file_mode = 'enviroment'
 ffi = cffi.FFI()
 
 if dae_file_mode == 'local':
-    import smib_dae_cffi as jacs
+    import smiba_dae_cffi as jacs
 if dae_file_mode == 'enviroment':
-    import envus.smib.smib_dae_cffi as jacs
+    import envus.smiba.smiba_dae_cffi as jacs
 
 cffi_support.register_module(jacs)
 f_ini_eval = jacs.lib.f_ini_eval
@@ -77,20 +77,20 @@ class model:
         self.solvern = 5 
         self.imax = 100 
         self.N_x = 4
-        self.N_y = 6 
-        self.N_z = 3 
+        self.N_y = 7 
+        self.N_z = 5 
         self.N_store = 100000 
-        self.params_list = ['X_d', 'X1d', 'T1d0', 'X_q', 'X1q', 'T1q0', 'R_a', 'X_l', 'H', 'D', 'Omega_b', 'omega_s', 'Theta_0', 'K_delta'] 
-        self.params_values_list  = [1.81, 0.3, 8.0, 1.76, 0.65, 1.0, 0.003, 0.02, 3.5, 0.0, 314.1592653589793, 1.0, 0.0, 1e-08] 
-        self.inputs_ini_list = ['p_m', 'v_f', 'v_0'] 
-        self.inputs_ini_values_list  = [0.8, 1.0, 1.0] 
-        self.inputs_run_list = ['p_m', 'v_f', 'v_0'] 
-        self.inputs_run_values_list = [0.8, 1.0, 1.0] 
-        self.outputs_list = ['p_m', 'p_e', 'v_f'] 
+        self.params_list = ['X_d', 'X1d', 'T1d0', 'X_q', 'X1q', 'T1q0', 'R_a', 'X_l', 'H', 'D', 'Omega_b', 'omega_s', 'Theta_0', 'K_delta', 'K_avr'] 
+        self.params_values_list  = [1.81, 0.3, 8.0, 1.76, 0.65, 1.0, 0.003, 0.02, 3.5, 0.0, 314.1592653589793, 1.0, 0.0, 1e-08, 100.0] 
+        self.inputs_ini_list = ['p_m', 'v_ref', 'v_s', 'v_0'] 
+        self.inputs_ini_values_list  = [0.8, 1.0, 1.0, 1.0] 
+        self.inputs_run_list = ['p_m', 'v_ref', 'v_s', 'v_0'] 
+        self.inputs_run_values_list = [0.8, 1.0, 1.0, 1.0] 
+        self.outputs_list = ['p_m', 'p_e', 'v_f', 'v_s', 'v_0'] 
         self.x_list = ['delta', 'omega', 'e1q', 'e1d'] 
-        self.y_run_list = ['i_d', 'i_q', 'p_t', 'q_t', 'v_t', 'theta_t'] 
+        self.y_run_list = ['i_d', 'i_q', 'p_t', 'q_t', 'v_t', 'theta_t', 'v_f'] 
         self.xy_list = self.x_list + self.y_run_list 
-        self.y_ini_list = ['i_d', 'i_q', 'p_t', 'q_t', 'v_t', 'theta_t'] 
+        self.y_ini_list = ['i_d', 'i_q', 'p_t', 'q_t', 'v_t', 'theta_t', 'v_f'] 
         self.xy_ini_list = self.x_list + self.y_ini_list 
         self.t = 0.0
         self.it = 0
@@ -131,10 +131,10 @@ class model:
         #self.sp_jac_ini = sspa.csr_matrix((data, self.sp_jac_ini_ia, self.sp_jac_ini_ja), shape=(self.sp_jac_ini_nia,self.sp_jac_ini_nja))
            
         if self.dae_file_mode == 'enviroment':
-            fobj = BytesIO(pkgutil.get_data(__name__, '__pycache__/smib_dae_sp_jac_ini_num.npz'))
+            fobj = BytesIO(pkgutil.get_data(__name__, '__pycache__/smiba_dae_sp_jac_ini_num.npz'))
             self.sp_jac_ini = sspa.load_npz(fobj)
         else:
-            self.sp_jac_ini = sspa.load_npz('./__pycache__/smib_dae_sp_jac_ini_num.npz')
+            self.sp_jac_ini = sspa.load_npz('./__pycache__/smiba_dae_sp_jac_ini_num.npz')
             
             
         self.jac_ini = self.sp_jac_ini.toarray()
@@ -153,10 +153,10 @@ class model:
         data = np.array(self.sp_jac_run_ia,dtype=np.float64)
 
         if self.dae_file_mode == 'enviroment':
-            fobj = BytesIO(pkgutil.get_data(__name__, '__pycache__/smib_dae_sp_jac_run_num.npz'))
+            fobj = BytesIO(pkgutil.get_data(__name__, '__pycache__/smiba_dae_sp_jac_run_num.npz'))
             self.sp_jac_run = sspa.load_npz(fobj)
         else:
-            self.sp_jac_run = sspa.load_npz('./__pycache__/smib_dae_sp_jac_run_num.npz')
+            self.sp_jac_run = sspa.load_npz('./__pycache__/smiba_dae_sp_jac_run_num.npz')
         self.jac_run = self.sp_jac_run.toarray()            
            
         self.J_run_d = np.array(self.sp_jac_run_ia)*0.0
@@ -174,10 +174,10 @@ class model:
     
 
         if self.dae_file_mode == 'enviroment':
-            fobj = BytesIO(pkgutil.get_data(__name__, '__pycache__/smib_dae_sp_jac_trap_num.npz'))
+            fobj = BytesIO(pkgutil.get_data(__name__, '__pycache__/smiba_dae_sp_jac_trap_num.npz'))
             self.sp_jac_trap = sspa.load_npz(fobj)
         else:
-            self.sp_jac_trap = sspa.load_npz('./__pycache__/smib_dae_sp_jac_trap_num.npz')
+            self.sp_jac_trap = sspa.load_npz('./__pycache__/smiba_dae_sp_jac_trap_num.npz')
             
 
         self.jac_trap = self.sp_jac_trap.toarray()
@@ -199,11 +199,11 @@ class model:
 
         self.lmax_it_ini,self.ltol_ini,self.ldamp_ini=50,1e-8,1.0
 
-        #self.sp_Fu_run = sspa.load_npz('./__pycache__/smib_dae_Fu_run_num.npz')
-        #self.sp_Gu_run = sspa.load_npz('./__pycache__/smib_dae_Gu_run_num.npz')
-        #self.sp_Hx_run = sspa.load_npz('./__pycache__/smib_dae_Hx_run_num.npz')
-        #self.sp_Hy_run = sspa.load_npz('./__pycache__/smib_dae_Hy_run_num.npz')
-        #self.sp_Hu_run = sspa.load_npz('./__pycache__/smib_dae_Hu_run_num.npz')        
+        #self.sp_Fu_run = sspa.load_npz('./__pycache__/smiba_dae_Fu_run_num.npz')
+        #self.sp_Gu_run = sspa.load_npz('./__pycache__/smiba_dae_Gu_run_num.npz')
+        #self.sp_Hx_run = sspa.load_npz('./__pycache__/smiba_dae_Hx_run_num.npz')
+        #self.sp_Hy_run = sspa.load_npz('./__pycache__/smiba_dae_Hy_run_num.npz')
+        #self.sp_Hu_run = sspa.load_npz('./__pycache__/smiba_dae_Hu_run_num.npz')        
  
         
 
@@ -1792,24 +1792,24 @@ def sp_H_jacs_run_eval(H_x,H_y,H_u,x,y,u,p,Dt):
 
 def sp_jac_ini_vectors():
 
-    sp_jac_ini_ia = [0, 1, 0, 1, 4, 5, 8, 9, 2, 4, 3, 5, 0, 2, 4, 5, 8, 9, 0, 3, 4, 5, 8, 9, 0, 4, 5, 6, 8, 9, 0, 4, 5, 7, 8, 9, 6, 8, 9, 7, 8, 9]
-    sp_jac_ini_ja = [0, 2, 8, 10, 12, 18, 24, 30, 36, 39, 42]
-    sp_jac_ini_nia = 10
-    sp_jac_ini_nja = 10
+    sp_jac_ini_ia = [0, 1, 0, 1, 4, 5, 8, 9, 2, 4, 10, 3, 5, 0, 2, 4, 5, 8, 9, 0, 3, 4, 5, 8, 9, 0, 4, 5, 6, 8, 9, 0, 4, 5, 7, 8, 9, 6, 8, 9, 7, 8, 9, 8, 10]
+    sp_jac_ini_ja = [0, 2, 8, 11, 13, 19, 25, 31, 37, 40, 43, 45]
+    sp_jac_ini_nia = 11
+    sp_jac_ini_nja = 11
     return sp_jac_ini_ia, sp_jac_ini_ja, sp_jac_ini_nia, sp_jac_ini_nja 
 
 def sp_jac_run_vectors():
 
-    sp_jac_run_ia = [0, 1, 0, 1, 4, 5, 8, 9, 2, 4, 3, 5, 0, 2, 4, 5, 8, 9, 0, 3, 4, 5, 8, 9, 0, 4, 5, 6, 8, 9, 0, 4, 5, 7, 8, 9, 6, 8, 9, 7, 8, 9]
-    sp_jac_run_ja = [0, 2, 8, 10, 12, 18, 24, 30, 36, 39, 42]
-    sp_jac_run_nia = 10
-    sp_jac_run_nja = 10
+    sp_jac_run_ia = [0, 1, 0, 1, 4, 5, 8, 9, 2, 4, 10, 3, 5, 0, 2, 4, 5, 8, 9, 0, 3, 4, 5, 8, 9, 0, 4, 5, 6, 8, 9, 0, 4, 5, 7, 8, 9, 6, 8, 9, 7, 8, 9, 8, 10]
+    sp_jac_run_ja = [0, 2, 8, 11, 13, 19, 25, 31, 37, 40, 43, 45]
+    sp_jac_run_nia = 11
+    sp_jac_run_nja = 11
     return sp_jac_run_ia, sp_jac_run_ja, sp_jac_run_nia, sp_jac_run_nja 
 
 def sp_jac_trap_vectors():
 
-    sp_jac_trap_ia = [0, 1, 0, 1, 4, 5, 8, 9, 2, 4, 3, 5, 0, 2, 4, 5, 8, 9, 0, 3, 4, 5, 8, 9, 0, 4, 5, 6, 8, 9, 0, 4, 5, 7, 8, 9, 6, 8, 9, 7, 8, 9]
-    sp_jac_trap_ja = [0, 2, 8, 10, 12, 18, 24, 30, 36, 39, 42]
-    sp_jac_trap_nia = 10
-    sp_jac_trap_nja = 10
+    sp_jac_trap_ia = [0, 1, 0, 1, 4, 5, 8, 9, 2, 4, 10, 3, 5, 0, 2, 4, 5, 8, 9, 0, 3, 4, 5, 8, 9, 0, 4, 5, 6, 8, 9, 0, 4, 5, 7, 8, 9, 6, 8, 9, 7, 8, 9, 8, 10]
+    sp_jac_trap_ja = [0, 2, 8, 11, 13, 19, 25, 31, 37, 40, 43, 45]
+    sp_jac_trap_nia = 11
+    sp_jac_trap_nja = 11
     return sp_jac_trap_ia, sp_jac_trap_ja, sp_jac_trap_nia, sp_jac_trap_nja 

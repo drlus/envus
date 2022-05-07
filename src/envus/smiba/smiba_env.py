@@ -3,9 +3,9 @@ from gym import spaces
 from gym.utils import seeding
 import numpy as np
 from os import path
-from envus.smib import smib_dae
+from envus.smiba import smiba_dae
 
-class SmibDAE(gym.Env):
+class SmibaDAE(gym.Env):
     metadata = {"render.modes": ["human", "rgb_array"], "video.frames_per_second": 30}
 
     def __init__(self, cont = False):
@@ -16,11 +16,11 @@ class SmibDAE(gym.Env):
         
 
         # Actions:
-        # v_f: (0,1.5)
-        self.min_v_f = 1.0
-        self.max_v_f = 5.0    
+        # v_s: (-0.1,0.1)
+        self.min_v_s = -0.05
+        self.max_v_s =  0.05   
         if self.cont:
-            self.action_space = spaces.Box(low=self.min_v_f, high=self.max_v_f, shape=(1,), dtype=np.float32)
+            self.action_space = spaces.Box(low=self.min_v_s, high=self.max_v_s, shape=(1,), dtype=np.float32)
         else:
             self.action_space = spaces.Discrete(50)
 
@@ -36,22 +36,29 @@ class SmibDAE(gym.Env):
 
         self.seed()
 
-        self.dae = smib_dae.model()
+        self.dae = smiba_dae.model()
         self.dae.Dt = 0.01
         self.p_m = 0.5
         self.v_0 = 1.0
-        self.v_f = 1.5
+        self.v_s = 0.0
+        self.v_ref = 1.0     
+        self.K_avr = 100
+        self.H = 6.5
         
+        self.dae.ini({'K_avr':100,'v_s':0.0,'p_m':0.01},
+          {'delta':0.0,'omega':1.0, 'v_t':1.0,'theta':0.0,'v_f':1.0,'e1q':1.0})
         
-        self.dae.ini({'v_f':self.v_f,'p_m':self.p_m,'H':6.5,'v_0':self.v_0},{'delta':0.0,'v_t':1,'omega':1,'e1q':1.0,'theta_t':0.0})
         self.dae.save_xy_0('xy_0.json')
-        self.t = 0.0
-        
 
-        self.v_t_ref = 1.0
+        self.dae.ini({'K_avr':self.K_avr,'v_s':self.v_s,'p_m':self.p_m,'H':self.H},
+                      'xy_0.json')
+        
+        self.t = 0.0
+    
         self.omega_ref = 1.0
         
-        self.DV_0 = 0.05
+        self.DV_0 = 0.001
+        self.DV_1 = 0.0
         
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -67,19 +74,19 @@ class SmibDAE(gym.Env):
         self.t += dt
         
         if self.cont:
-            v_f = np.clip(u, self.min_v_f, self.max_v_f)[0]
-            self.v_f = v_f
+            v_s = np.clip(u, self.min_v_s, self.max_v_s)[0]
+            self.v_s = v_s
         else:
-            self.v_f = self.d2c(u)
+            self.v_s = self.d2c(u)
         
-        self.dae.step(self.t,{'v_f':self.v_f,'p_m':p_m,'v_0':v_0})
-     
+        self.dae.step(self.t,{'K_avr':self.K_avr,'v_s':self.v_s,'p_m':self.p_m,'H':self.H,'v_0':self.v_0})     
         #self.state = np.array([newth, newthdot])\n",
         self.state = self.dae.get_mvalue(['v_t','omega','p_t','q_t'])
+        if self.state[1]>1.5: print(f'SM out of step with omega = {self.state[1]}')
         
         v_t,omega,p_t,q_t = self.state
         
-        costs = -np.log(np.abs(self.v_t_ref - v_t)) - np.log(np.abs(p_m-p_t))
+        costs = - np.log(np.abs(p_m-p_t))
         #costs =  - np.log(np.abs(self.omega_ref - omega)*400)
 
         return self._get_obs(), -costs, False, {}
@@ -91,10 +98,12 @@ class SmibDAE(gym.Env):
         #self.last_u = None
         
         self.t = 0.0
-        self.V_0 = 1.0
-        self.dae.ini({'v_f':self.v_f,'p_m':self.p_m,'v_0':self.v_0},'xy_0.json')
+        self.dae.ini({'K_avr':self.K_avr,'v_s':self.v_s,'p_m':self.p_m,'H':self.H,'v_0':self.v_0},'xy_0.json')
+
         self.state = self.dae.get_mvalue(['v_t','omega','p_t','q_t'])
-        self.v_0 = 1.0 + DV_0
+        self.state[1] = 1.01
+        self.dae.xy[1] = 1.01
+        self.v_0 = 1.0 + DV_0 + self.DV_1
         
         #print(f'V_0 = {self.V_0:0.3f}')
         return self._get_obs()
@@ -108,13 +117,13 @@ class SmibDAE(gym.Env):
     
     def d2c(self,action):
         
-        self.v_f_c = (self.max_v_f - self.min_v_f)/(self.action_space.n)*(action) + self.min_v_f
+        self.v_f_c = (self.max_v_s - self.min_v_s)/(self.action_space.n)*(action) + self.min_v_s
         
         return self.v_f_c
 
     def c2d(self,c):
         
-        d = self.action_space.n*(c - self.min_v_f)/(self.max_v_f - self.min_v_f)
+        d = self.action_space.n*(c - self.min_v_s)/(self.max_v_s - self.min_v_f)
         return int(d)
     
     def close(self):
