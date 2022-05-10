@@ -8,6 +8,9 @@ testpaths = [
 requires = ["flit_core >=2,<3"]
 build-backend = "flit_core.buildapi"
 
+[tool.flit.scripts]
+prueba = "prueba:main"
+
 [tool.flit.metadata]
 module = "envus"
 author = "DRLUS"

@@ -89,7 +89,7 @@ class SmibaDAE(gym.Env):
         costs = - np.log(np.abs(p_m-p_t))
         #costs =  - np.log(np.abs(self.omega_ref - omega)*400)
 
-        return self._get_obs(), -costs, False, {}
+        return self._get_obs(), costs, False, {}
 
     def reset(self):
         
