@@ -11,9 +11,7 @@ class SmibaDAE(gym.Env):
     def __init__(self, cont = False):
         self.dt = 0.05
         self.viewer = None
-        
-        self.cont = True
-        
+        self.cont = cont
 
         # Actions:
         # v_s: (-0.1,0.1)
@@ -22,7 +20,7 @@ class SmibaDAE(gym.Env):
         if self.cont:
             self.action_space = spaces.Box(low=self.min_v_s, high=self.max_v_s, shape=(1,), dtype=np.float32)
         else:
-            self.action_space = spaces.Discrete(50)
+            self.action_space = spaces.Discrete(5)
 
         # Observations:
         # v_t: (0,1.5)
