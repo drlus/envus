@@ -96,6 +96,9 @@ class SmibaDAE(gym.Env):
         #self.last_u = None
         
         self.t = 0.0
+        self.v_0 = 1.0
+        self.v_s = 0.0
+        
         self.dae.ini({'K_avr':self.K_avr,'v_s':self.v_s,'p_m':self.p_m,'H':self.H,'v_0':self.v_0},'xy_0.json')
 
         self.state = self.dae.get_mvalue(['v_t','omega','p_t','q_t'])
@@ -121,7 +124,7 @@ class SmibaDAE(gym.Env):
 
     def c2d(self,c):
         
-        d = self.action_space.n*(c - self.min_v_s)/(self.max_v_s - self.min_v_f)
+        d = self.action_space.n*(c - self.min_v_s)/(self.max_v_s - self.min_v_s)
         return int(d)
     
     def close(self):
