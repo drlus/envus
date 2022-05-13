@@ -3,7 +3,7 @@ from gym import spaces
 from gym.utils import seeding
 import numpy as np
 from os import path
-from envus.smiba import smiba_dae
+import smiba_dae
 
 class SmibaDAE(gym.Env):
     metadata = {"render.modes": ["human", "rgb_array"], "video.frames_per_second": 30}
