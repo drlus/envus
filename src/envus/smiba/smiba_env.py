@@ -9,18 +9,18 @@ class SmibaDAE(gym.Env):
     metadata = {"render.modes": ["human", "rgb_array"], "video.frames_per_second": 30}
 
     def __init__(self, cont = False):
-        self.dt = 0.05
+        self.dt = 0.1
         self.viewer = None
         self.cont = cont
 
         # Actions:
         # v_s: (-0.1,0.1)
-        self.min_v_s = -0.05
-        self.max_v_s =  0.05   
+        self.min_v_s = -0.1
+        self.max_v_s =  0.1   
         if self.cont:
             self.action_space = spaces.Box(low=self.min_v_s, high=self.max_v_s, shape=(1,), dtype=np.float32)
         else:
-            self.action_space = spaces.Discrete(20)
+            self.action_space = spaces.Discrete(5)
 
         # Observations:
         # v_t: (0,1.5)
@@ -55,7 +55,7 @@ class SmibaDAE(gym.Env):
     
         self.omega_ref = 1.0
         
-        self.DV_0 = 0.001
+        self.DV_0 = 1e-6
         self.DV_1 = 0.0
         
     def seed(self, seed=None):
@@ -84,7 +84,7 @@ class SmibaDAE(gym.Env):
         
         v_t,omega,p_t,q_t = self.state
         
-        costs = -1e3*(omega-1)**2
+        costs = -np.log(np.abs((100*(omega-1))**2 + (p_t - p_m)**2)/((100*self.delta_omega)**2))
         #costs =  - np.log(np.abs(self.omega_ref - omega)*400)
 
         return self._get_obs(), costs, False, {}
@@ -102,7 +102,9 @@ class SmibaDAE(gym.Env):
         self.dae.ini({'K_avr':self.K_avr,'v_s':self.v_s,'p_m':self.p_m,'H':self.H,'v_0':self.v_0},'xy_0.json')
 
         self.state = self.dae.get_mvalue(['v_t','omega','p_t','q_t'])
-        self.state[1] = self.np_random.uniform(low=0.99, high=1.01)
+        #self.delta_omega = self.np_random.uniform(low=0.01, high=0.02)
+        self.delta_omega = 0.02
+        self.state[1] = 1 + self.delta_omega
         self.dae.xy[1] = self.state[1]
         self.v_0 = 1.0 + DV_0 + self.DV_1
         
@@ -118,7 +120,7 @@ class SmibaDAE(gym.Env):
     
     def d2c(self,action):
         
-        self.v_f_c = (self.max_v_s - self.min_v_s)/(self.action_space.n)*(action) + self.min_v_s
+        self.v_f_c = (self.max_v_s - self.min_v_s)/(self.action_space.n-1)*(action) + self.min_v_s
         
         return self.v_f_c
 
