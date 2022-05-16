@@ -9,7 +9,7 @@ class SmibaDAE(gym.Env):
     metadata = {"render.modes": ["human", "rgb_array"], "video.frames_per_second": 30}
 
     def __init__(self, cont = False):
-        self.dt = 0.1
+        self.dt = 0.05
         self.viewer = None
         self.cont = cont
 
@@ -20,7 +20,7 @@ class SmibaDAE(gym.Env):
         if self.cont:
             self.action_space = spaces.Box(low=self.min_v_s, high=self.max_v_s, shape=(1,), dtype=np.float32)
         else:
-            self.action_space = spaces.Discrete(5)
+            self.action_space = spaces.Discrete(11)
 
         # Observations:
         # v_t: (0,1.5)
@@ -56,8 +56,10 @@ class SmibaDAE(gym.Env):
         self.omega_ref = 1.0
         
         #perturbations
-        self.delta_omega_min = 0.019
-        self.delta_omega_max = 0.021
+        self.delta_omega_min = 0.018
+        self.delta_omega_max = 0.022
+        self.delta_p_m_min = 0.2
+        self.delta_p_m_max = 0.8
         self.DV_0 = 1e-6
         self.DV_1 = 0.0
         
@@ -101,6 +103,8 @@ class SmibaDAE(gym.Env):
         self.t = 0.0
         self.v_0 = 1.0
         self.v_s = 0.0
+        
+        self.p_m = self.np_random.uniform(low=self.p_m_min, high=self.p_m_max)
         
         self.dae.ini({'K_avr':self.K_avr,'v_s':self.v_s,'p_m':self.p_m,'H':self.H,'v_0':self.v_0},'xy_0.json')
 
