@@ -102,8 +102,8 @@ class SmibaDAE(gym.Env):
         self.dae.ini({'K_avr':self.K_avr,'v_s':self.v_s,'p_m':self.p_m,'H':self.H,'v_0':self.v_0},'xy_0.json')
 
         self.state = self.dae.get_mvalue(['v_t','omega','p_t','q_t'])
-        #self.delta_omega = self.np_random.uniform(low=0.01, high=0.02)
-        self.delta_omega = 0.02
+        self.delta_omega = self.np_random.uniform(low=0.01, high=0.02)
+        #self.delta_omega = 0.02
         self.state[1] = 1 + self.delta_omega
         self.dae.xy[1] = self.state[1]
         self.v_0 = 1.0 + DV_0 + self.DV_1
