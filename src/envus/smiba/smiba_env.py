@@ -58,8 +58,8 @@ class SmibaDAE(gym.Env):
         #perturbations
         self.delta_omega_min = 0.018
         self.delta_omega_max = 0.022
-        self.delta_p_m_min = 0.2
-        self.delta_p_m_max = 0.8
+        self.p_m_min = 0.2
+        self.p_m_max = 0.8
         self.DV_0 = 1e-6
         self.DV_1 = 0.0
         
