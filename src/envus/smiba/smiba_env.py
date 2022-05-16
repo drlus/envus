@@ -87,7 +87,7 @@ class SmibaDAE(gym.Env):
         
         v_t,omega,p_t,q_t = self.state
         
-        costs = -np.log(np.abs((100*(omega-1))**2 + (p_t - p_m)**2)/((100*self.delta_omega)**2))
+        costs = -(np.abs((100*(omega-1))**2 + (p_t - p_m)**2)/((100*self.delta_omega)**2))
         #costs =  - np.log(np.abs(self.omega_ref - omega)*400)
 
         return self._get_obs(), costs, False, {}
