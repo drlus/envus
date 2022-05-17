@@ -20,7 +20,7 @@ class SmibaDAE(gym.Env):
         if self.cont:
             self.action_space = spaces.Box(low=self.min_v_s, high=self.max_v_s, shape=(1,), dtype=np.float32)
         else:
-            self.action_space = spaces.Discrete(11)
+            self.action_space = spaces.Discrete(5)
 
         # Observations:
         # v_t: (0,1.5)
@@ -58,8 +58,8 @@ class SmibaDAE(gym.Env):
         #perturbations
         self.delta_omega_min = 0.018
         self.delta_omega_max = 0.022
-        self.p_m_min = 0.2
-        self.p_m_max = 0.8
+        self.p_m_min = 0.49
+        self.p_m_max = 0.51
         self.DV_0 = 1e-6
         self.DV_1 = 0.0
         
