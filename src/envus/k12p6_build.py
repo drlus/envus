@@ -3,6 +3,7 @@ import numpy as np
 import pydae.build_cffi as cbuilder
 from pydae.grid_bpu import bpu
 import pathlib
+import envus
 
 file_path = pathlib.Path(envus.__file__).parent / "k12p6" / "k12p6.json"
 
