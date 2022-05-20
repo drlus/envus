@@ -5,7 +5,7 @@ from pydae.grid_bpu import bpu
 import pathlib
 import envus
 
-file_path = pathlib.Path(envus.__file__).parent / "k12p6" / "k12p6.json"
+file_path = str(pathlib.Path(envus.__file__).parent / "k12p6" / "k12p6.json")
 
 grid = bpu(file_path)
 
