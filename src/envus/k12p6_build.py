@@ -1,6 +1,7 @@
 import sympy as sym
 import numpy as np
 import pydae.build_cffi as cbuilder
+from pydae.grid_bpu import bpu
 
 file_path = './k12p6/k12p6.json'
 
